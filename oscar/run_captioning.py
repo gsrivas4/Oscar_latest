@@ -17,8 +17,8 @@ from oscar.utils.tsv_file_ops import (tsv_writer, concat_tsv_files,
         delete_tsv_files, reorder_tsv_keys)
 from oscar.utils.misc import (mkdir, set_seed,
         load_from_yaml_file, find_file_path_in_yaml)
-from oscar.utils.caption_evaluate import (evaluate_on_coco_caption,
-        ScstRewardCriterion)
+#from oscar.utils.caption_evaluate import (evaluate_on_coco_caption,
+#        ScstRewardCriterion)
 from oscar.utils.cbs import ConstraintFilter, ConstraintBoxesReader
 from oscar.utils.cbs import FiniteStateMachineBuilder
 from oscar.modeling.modeling_bert import BertForImageCaptioning
