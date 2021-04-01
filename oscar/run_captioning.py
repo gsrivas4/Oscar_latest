@@ -15,7 +15,7 @@ from oscar.utils.logger import setup_logger
 from oscar.utils.tsv_file import TSVFile
 from oscar.utils.tsv_file_ops import (tsv_writer, concat_tsv_files,
         delete_tsv_files, reorder_tsv_keys)
-from oscar.utils.misc import (mkdir, set_seed, 
+from oscar.utils.misc import (mkdir, set_seed,
         load_from_yaml_file, find_file_path_in_yaml)
 from oscar.utils.caption_evaluate import (evaluate_on_coco_caption,
         ScstRewardCriterion)
@@ -28,13 +28,13 @@ from transformers.pytorch_transformers import AdamW, WarmupLinearSchedule, Warmu
 
 class CaptionTSVDataset(Dataset):
     def __init__(self, yaml_file, tokenizer=None, add_od_labels=True,
-            max_img_seq_length=50, max_seq_length=70, max_seq_a_length=40, 
+            max_img_seq_length=50, max_seq_length=70, max_seq_a_length=40,
             is_train=True, mask_prob=0.15, max_masked_tokens=3, **kwargs):
         """Constructor.
         Args:
             yaml file with all required data (image feature, caption, labels, etc)
             tokenizer: tokenizer for text processing.
-            add_od_labels: whether to add labels from yaml file to BERT. 
+            add_od_labels: whether to add labels from yaml file to BERT.
             max_img_seq_length: max image sequence length.
             max_seq_length: max text sequence length.
             max_seq_a_length: max caption sequence length.
@@ -194,7 +194,7 @@ class CaptionTSVDatasetWithConstraints(CaptionTSVDataset):
 
 
 class CaptionTensorizer(object):
-    def __init__(self, tokenizer, max_img_seq_length=50, max_seq_length=70, 
+    def __init__(self, tokenizer, max_img_seq_length=50, max_seq_length=70,
             max_seq_a_length=40, mask_prob=0.15, max_masked_tokens=3,
             is_train=True):
         """Constructor.
@@ -214,7 +214,7 @@ class CaptionTensorizer(object):
         self.max_seq_a_len = max_seq_a_length
         self.mask_prob = mask_prob
         self.max_masked_tokens = max_masked_tokens
-        self._triangle_mask = torch.tril(torch.ones((self.max_seq_len, 
+        self._triangle_mask = torch.tril(torch.ones((self.max_seq_len,
             self.max_seq_len), dtype=torch.long))
 
     def tensorize_example(self, text_a, img_feat, text_b=None,
@@ -268,7 +268,7 @@ class CaptionTensorizer(object):
                     # 10% chance to remain the same (1-0.8-0.1)
                     pass
 
-            masked_pos[masked_idx] = 1 
+            masked_pos[masked_idx] = 1
             # pad masked tokens to the same length
             if num_masked < self.max_masked_tokens:
                 masked_token = masked_token + ([self.tokenizer.pad_token] *
@@ -295,8 +295,8 @@ class CaptionTensorizer(object):
 
         # prepare attention mask:
         # note that there is no attention from caption to image
-        # because otherwise it will violate the triangle attention 
-        # for caption as caption will have full attention on image. 
+        # because otherwise it will violate the triangle attention
+        # for caption as caption will have full attention on image.
         max_len = self.max_seq_len + self.max_img_seq_len
         attention_mask = torch.zeros((max_len, max_len), dtype=torch.long)
         # C: caption, L: label, R: image region
@@ -354,9 +354,9 @@ def make_data_sampler(dataset, shuffle, distributed):
     return sampler
 
 
-def make_data_loader(args, yaml_file, tokenizer, is_distributed=True, 
+def make_data_loader(args, yaml_file, tokenizer, is_distributed=True,
         is_train=True):
-    dataset = build_dataset(yaml_file, tokenizer, args, 
+    dataset = build_dataset(yaml_file, tokenizer, args,
         is_train=(is_train and not args.scst))
     if is_train:
         shuffle = True
@@ -403,14 +403,14 @@ def save_checkpoint(model, tokenizer, args, epoch, iteration, num_trial=10):
 
 def compute_score_with_logits(logits, labels):
     logits = torch.max(logits, -1)[1].data # argmax
-    scores = logits == labels 
+    scores = logits == labels
     return scores
 
 
 def train(args, train_dataloader, val_dataset, model, tokenizer):
     if args.distributed:
         model = torch.nn.parallel.DistributedDataParallel(
-            model, device_ids=[args.local_rank], 
+            model, device_ids=[args.local_rank],
             output_device=args.local_rank,
             find_unused_parameters=True,
         )
@@ -468,7 +468,7 @@ def train(args, train_dataloader, val_dataset, model, tokenizer):
             if not args.scst:
                 model.train()
                 inputs = {'input_ids': batch[0], 'attention_mask': batch[1],
-                    'token_type_ids': batch[2], 'img_feats': batch[3], 
+                    'token_type_ids': batch[2], 'img_feats': batch[3],
                     'masked_pos': batch[4], 'masked_ids': batch[5]
                 }
                 outputs = model(**inputs)
@@ -494,16 +494,16 @@ def train(args, train_dataloader, val_dataset, model, tokenizer):
                 model.zero_grad()
                 if global_step % args.logging_steps == 0:
                     logger.info("Epoch: {}, global_step: {}, lr: {:.6f}, loss: {:.4f} ({:.4f}), " \
-                        "score: {:.4f} ({:.4f})".format(epoch, global_step, 
-                        optimizer.param_groups[0]["lr"], loss, global_loss / global_step, 
+                        "score: {:.4f} ({:.4f})".format(epoch, global_step,
+                        optimizer.param_groups[0]["lr"], loss, global_loss / global_step,
                         batch_acc, global_acc / global_step)
                     )
 
                 if (args.save_steps > 0 and global_step % args.save_steps == 0) or \
                         global_step == t_total:
-                    checkpoint_dir = save_checkpoint(model, tokenizer, args, epoch, global_step) 
+                    checkpoint_dir = save_checkpoint(model, tokenizer, args, epoch, global_step)
                     # evaluation
-                    if args.evaluate_during_training: 
+                    if args.evaluate_during_training:
                         logger.info("Perform evaluation at step: %d" % (global_step))
                         evaluate_file = evaluate(args, val_dataset, model, tokenizer,
                                 checkpoint_dir)
@@ -519,10 +519,10 @@ def train(args, train_dataloader, val_dataset, model, tokenizer):
     return checkpoint_dir
 
 
-def scst_train_iter(args, train_dataloader, model, scst_criterion, 
+def scst_train_iter(args, train_dataloader, model, scst_criterion,
         img_keys, batch, tokenizer):
     cls_token_id, sep_token_id, pad_token_id, mask_token_id = \
-        tokenizer.convert_tokens_to_ids([tokenizer.cls_token, 
+        tokenizer.convert_tokens_to_ids([tokenizer.cls_token,
         tokenizer.sep_token, tokenizer.pad_token, tokenizer.mask_token]
     )
     inputs = {'is_decode': True,
@@ -636,13 +636,13 @@ def evaluate(args, val_dataloader, model, tokenizer, output_dir):
 
 def test(args, test_dataloader, model, tokenizer, predict_file):
     cls_token_id, sep_token_id, pad_token_id, mask_token_id, period_token_id = \
-        tokenizer.convert_tokens_to_ids([tokenizer.cls_token, tokenizer.sep_token, 
+        tokenizer.convert_tokens_to_ids([tokenizer.cls_token, tokenizer.sep_token,
         tokenizer.pad_token, tokenizer.mask_token, '.'])
     world_size = get_world_size()
     if world_size == 1:
         cache_file = predict_file
     else:
-        cache_file = op.splitext(predict_file)[0] + '_{}_{}'.format(get_rank(), 
+        cache_file = op.splitext(predict_file)[0] + '_{}_{}'.format(get_rank(),
                 world_size) + op.splitext(predict_file)[1]
 
     model.eval()
@@ -804,63 +804,63 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", default='datasets/coco_caption', type=str, required=False,
                         help="The input data dir with all required files.")
-    parser.add_argument("--train_yaml", default='train.yaml', type=str, required=False, 
+    parser.add_argument("--train_yaml", default='train.yaml', type=str, required=False,
                         help="yaml file for training.")
     parser.add_argument("--test_yaml", default='test.yaml', type=str, required=False,
                         help="yaml file for testing.")
-    parser.add_argument("--val_yaml", default='val.yaml', type=str, required=False, 
+    parser.add_argument("--val_yaml", default='val.yaml', type=str, required=False,
                         help="yaml file used for validation during training.")
     parser.add_argument("--model_name_or_path", default=None, type=str, required=False,
                         help="Path to pre-trained model or model type.")
     parser.add_argument("--output_dir", default='output/', type=str, required=False,
                         help="The output directory to save checkpoint and test results.")
-    parser.add_argument("--loss_type", default='sfmx', type=str, 
+    parser.add_argument("--loss_type", default='sfmx', type=str,
                         help="Loss function types: support kl, x2, sfmx")
-    parser.add_argument("--config_name", default="", type=str, 
+    parser.add_argument("--config_name", default="", type=str,
                         help="Pretrained config name or path if not the same as model_name.")
-    parser.add_argument("--tokenizer_name", default="", type=str, 
+    parser.add_argument("--tokenizer_name", default="", type=str,
                         help="Pretrained tokenizer name or path if not the same as model_name.")
     parser.add_argument("--max_seq_length", default=70, type=int,
                         help="The maximum total input sequence length after tokenization. "
                              "Sequences longer than this will be truncated, "
                              "sequences shorter will be padded.")
-    parser.add_argument("--max_seq_a_length", default=40, type=int, 
+    parser.add_argument("--max_seq_a_length", default=40, type=int,
                         help="The maximum sequence length for caption.")
     parser.add_argument("--do_train", action='store_true', help="Whether to run training.")
     parser.add_argument("--do_test", action='store_true', help="Whether to run inference.")
     parser.add_argument("--do_eval", action='store_true', help="Whether to run evaluation.")
-    parser.add_argument("--do_lower_case", action='store_true', 
+    parser.add_argument("--do_lower_case", action='store_true',
                         help="Set this flag if you are using an uncased model.")
     parser.add_argument("--mask_prob", default=0.15, type=float,
                         help= "Probability to mask input sentence during training.")
     parser.add_argument("--max_masked_tokens", type=int, default=3,
                         help="The max number of masked tokens per sentence.")
-    parser.add_argument("--add_od_labels", default=False, action='store_true', 
+    parser.add_argument("--add_od_labels", default=False, action='store_true',
                         help="Whether to add object detection labels or not")
     parser.add_argument("--drop_out", default=0.1, type=float, help="Drop out in BERT.")
-    parser.add_argument("--max_img_seq_length", default=50, type=int, 
+    parser.add_argument("--max_img_seq_length", default=50, type=int,
                         help="The maximum total input image sequence length.")
-    parser.add_argument("--img_feature_dim", default=2054, type=int, 
+    parser.add_argument("--img_feature_dim", default=2054, type=int,
                         help="The Image Feature Dimension.")
     parser.add_argument("--img_feature_type", default='frcnn', type=str,
                         help="Image feature type.")
-    parser.add_argument("--tie_weights", default=False, action='store_true', 
+    parser.add_argument("--tie_weights", default=False, action='store_true',
                         help="Whether to tie decoding weights to that of encoding")
-    parser.add_argument("--freeze_embedding", default=False, action='store_true', 
+    parser.add_argument("--freeze_embedding", default=False, action='store_true',
                         help="Whether to freeze word embeddings in Bert")
-    parser.add_argument("--label_smoothing", default=0, type=float, 
+    parser.add_argument("--label_smoothing", default=0, type=float,
                         help=".")
-    parser.add_argument("--drop_worst_ratio", default=0, type=float, 
+    parser.add_argument("--drop_worst_ratio", default=0, type=float,
                         help=".")
-    parser.add_argument("--drop_worst_after", default=0, type=int, 
+    parser.add_argument("--drop_worst_after", default=0, type=int,
                         help=".")
-    parser.add_argument("--per_gpu_train_batch_size", default=64, type=int, 
+    parser.add_argument("--per_gpu_train_batch_size", default=64, type=int,
                         help="Batch size per GPU/CPU for training.")
-    parser.add_argument("--per_gpu_eval_batch_size", default=64, type=int, 
+    parser.add_argument("--per_gpu_eval_batch_size", default=64, type=int,
                         help="Batch size per GPU/CPU for evaluation.")
     parser.add_argument("--output_mode", default='classification', type=str,
                         help="output mode, support classification or regression.")
-    parser.add_argument("--num_labels", default=2, type=int, 
+    parser.add_argument("--num_labels", default=2, type=int,
                         help="num_labels is 2 for classification and 1 for regression.")
     parser.add_argument('--gradient_accumulation_steps', type=int, default=1,
                         help="Number of updates steps to accumulate before backward.")
@@ -871,17 +871,17 @@ def main():
     parser.add_argument("--warmup_steps", default=0, type=int, help="Linear warmup.")
     parser.add_argument("--scheduler", default='linear', type=str, help="constant or linear or")
     parser.add_argument("--num_workers", default=4, type=int, help="Workers in dataloader.")
-    parser.add_argument("--num_train_epochs", default=40, type=int, 
+    parser.add_argument("--num_train_epochs", default=40, type=int,
                         help="Total number of training epochs to perform.")
-    parser.add_argument("--max_steps", default=-1, type=int, 
+    parser.add_argument("--max_steps", default=-1, type=int,
                         help="Total number of training steps. Override num_train_epochs.")
     parser.add_argument('--logging_steps', type=int, default=20, help="Log every X steps.")
-    parser.add_argument('--save_steps', type=int, default=-1, 
+    parser.add_argument('--save_steps', type=int, default=-1,
                         help="Save checkpoint every X steps. Will also perform evaluatin.")
-    parser.add_argument("--evaluate_during_training", action='store_true', 
+    parser.add_argument("--evaluate_during_training", action='store_true',
                         help="Run evaluation during training at each save_steps.")
     parser.add_argument("--no_cuda", action='store_true', help="Avoid using CUDA.")
-    parser.add_argument("--local_rank", type=int, default=0, 
+    parser.add_argument("--local_rank", type=int, default=0,
                         help="For distributed training.")
     parser.add_argument('--seed', type=int, default=88, help="random seed for initialization.")
     # for self-critical sequence training
@@ -895,7 +895,7 @@ def main():
     parser.add_argument('--cider_cached_tokens', type=str, default='coco-train-words.p',
                         help="path to cached cPickle file used to calculate CIDEr scores")
     # for generation
-    parser.add_argument("--eval_model_dir", type=str, default='', 
+    parser.add_argument("--eval_model_dir", type=str, default='',
                         help="Model directory for evaluation.")
     parser.add_argument('--max_gen_length', type=int, default=20,
                         help="max length of generated sentences")
@@ -972,38 +972,38 @@ def main():
         logger.info("Evaluate the following checkpoint: %s", checkpoint)
         model = model_class.from_pretrained(checkpoint, config=config)
 
-    model.to(args.device)
-    logger.info("Training/evaluation parameters %s", args)
-    if args.do_train:
-        train_dataloader = make_data_loader(args, args.train_yaml, tokenizer,
-            args.distributed, is_train=True)
-        val_dataloader = None
-        if args.evaluate_during_training:
-            val_dataloader = make_data_loader(args, args.val_yaml, tokenizer,
-                args.distributed, is_train=False)
-        last_checkpoint = train(args, train_dataloader, val_dataloader, model, tokenizer)
-
-        # test the last checkpoint after training
-        if args.do_test:
-            logger.info("Evaluate on dataset: " + args.test_yaml)
-            test_dataloader = make_data_loader(args, args.test_yaml, 
-                tokenizer, args.distributed, is_train=False)
-            evaluate(args, test_dataloader, model, tokenizer, last_checkpoint)
-
-    # inference and evaluation
-    elif args.do_test or args.do_eval:
-        logger.info("Evaluate on dataset: " + args.test_yaml)
-        test_dataloader = make_data_loader(args, args.test_yaml,
-            tokenizer, args.distributed, is_train=False)
-
-        if not args.do_eval:
-            predict_file = get_predict_file(checkpoint, test_dataloader.dataset.yaml_file, args)
-            test(args, test_dataloader, model, tokenizer, predict_file)
-            logger.info("Prediction results saved to: {}".format(predict_file))
-        else:
-            evaluate_file = evaluate(args, test_dataloader, model, tokenizer,
-                    checkpoint)
-            logger.info("Evaluation results saved to: {}".format(evaluate_file))
+    # model.to(args.device)
+    # logger.info("Training/evaluation parameters %s", args)
+    # if args.do_train:
+    #     train_dataloader = make_data_loader(args, args.train_yaml, tokenizer,
+    #         args.distributed, is_train=True)
+    #     val_dataloader = None
+    #     if args.evaluate_during_training:
+    #         val_dataloader = make_data_loader(args, args.val_yaml, tokenizer,
+    #             args.distributed, is_train=False)
+    #     last_checkpoint = train(args, train_dataloader, val_dataloader, model, tokenizer)
+    #
+    #     # test the last checkpoint after training
+    #     if args.do_test:
+    #         logger.info("Evaluate on dataset: " + args.test_yaml)
+    #         test_dataloader = make_data_loader(args, args.test_yaml,
+    #             tokenizer, args.distributed, is_train=False)
+    #         evaluate(args, test_dataloader, model, tokenizer, last_checkpoint)
+    #
+    # # inference and evaluation
+    # elif args.do_test or args.do_eval:
+    #     logger.info("Evaluate on dataset: " + args.test_yaml)
+    #     test_dataloader = make_data_loader(args, args.test_yaml,
+    #         tokenizer, args.distributed, is_train=False)
+    #
+    #     if not args.do_eval:
+    #         predict_file = get_predict_file(checkpoint, test_dataloader.dataset.yaml_file, args)
+    #         test(args, test_dataloader, model, tokenizer, predict_file)
+    #         logger.info("Prediction results saved to: {}".format(predict_file))
+    #     else:
+    #         evaluate_file = evaluate(args, test_dataloader, model, tokenizer,
+    #                 checkpoint)
+    #         logger.info("Evaluation results saved to: {}".format(evaluate_file))
 
 if __name__ == "__main__":
     main()
