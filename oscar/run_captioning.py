@@ -22,9 +22,10 @@ from oscar.utils.misc import (mkdir, set_seed,
 from oscar.utils.cbs import ConstraintFilter, ConstraintBoxesReader
 from oscar.utils.cbs import FiniteStateMachineBuilder
 from oscar.modeling.modeling_bert import BertForImageCaptioning
-from transformers.pytorch_transformers import BertTokenizer, BertConfig
-from transformers.pytorch_transformers import AdamW, WarmupLinearSchedule, WarmupConstantSchedule
-
+# from transformers.pytorch_transformers import BertTokenizer, BertConfig
+# from transformers.pytorch_transformers import AdamW, WarmupLinearSchedule, WarmupConstantSchedule
+from transformers import BertTokenizer, BertConfig
+from transformers import AdamW, get_linear_schedule_with_warmup, get_constant_schedule
 
 class CaptionTSVDataset(Dataset):
     def __init__(self, yaml_file, tokenizer=None, add_od_labels=True,
