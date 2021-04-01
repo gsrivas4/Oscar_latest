@@ -4,7 +4,8 @@
 * cd Oscar_latest
 * `git clone https://github.com/huggingface/transformers`
 * cd transformers
-* `git checkout 067923d3267325f525f4e46f357360c191ba562e`
+* `git checkout master`
+* `pip install trasformers`
 * `cd ..`
 * `mkdir pretrained_models`
 * `cd pretrained_models`
@@ -12,4 +13,5 @@
 * `unzip base-vg-labels.zip`
 * `cd ..`
 * `pip install boto3`
+* run `python oscar/run_captioning.py --model_name_or_path pretrained_models/base-vg-labels/ep_67_588997 --do_train --do_lower_case --evaluate_during_training --add_od_labels --learning_rate 0.00003 --per_gpu_train_batch_size 64 --num_train_epochs 30 --save_steps 5000 --output_dir output/`
 
