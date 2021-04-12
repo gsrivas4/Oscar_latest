@@ -70,7 +70,9 @@ class CaptionBertSelfAttention(BertSelfAttention):
         new_context_layer_shape = context_layer.size()[:-2] + (self.all_head_size,)
         context_layer = context_layer.view(*new_context_layer_shape)
 
-        outputs = (context_layer, attention_probs) if self.output_attentions else (context_layer,)
+        # edited by Gaurav
+        # outputs = (context_layer, attention_probs) if self.output_attentions else (context_layer,)
+        outputs = (context_layer,)
         return outputs
 
 
@@ -189,7 +191,7 @@ class BertImgModel(BertPreTrainedModel):
 
     def get_input_embeddings(self):
         return self.embeddings.word_embeddings
-    
+
     def _resize_token_embeddings(self, new_num_tokens):
         old_embeddings = self.embeddings.word_embeddings
         new_embeddings = self._get_resized_embeddings(old_embeddings, new_num_tokens)
