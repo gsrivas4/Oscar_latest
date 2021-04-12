@@ -11,5 +11,6 @@
 * `wget https://biglmdiag.blob.core.windows.net/oscar/pretrained_models/base-vg-labels.zip`
 * `unzip base-vg-labels.zip`
 * `cd ..`
+* Download dataset using the instructions on this link https://github.com/microsoft/Oscar/blob/master/DOWNLOAD.md#note - install azcopy and then run `path/to/azcopy copy https://biglmdiag.blob.core.windows.net/oscar/datasets/coco_caption.zip <local_path>`
 * `pip install boto3`
 

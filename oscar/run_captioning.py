@@ -972,38 +972,38 @@ def main():
         logger.info("Evaluate the following checkpoint: %s", checkpoint)
         model = model_class.from_pretrained(checkpoint, config=config)
 
-    # model.to(args.device)
-    # logger.info("Training/evaluation parameters %s", args)
-    # if args.do_train:
-    #     train_dataloader = make_data_loader(args, args.train_yaml, tokenizer,
-    #         args.distributed, is_train=True)
-    #     val_dataloader = None
-    #     if args.evaluate_during_training:
-    #         val_dataloader = make_data_loader(args, args.val_yaml, tokenizer,
-    #             args.distributed, is_train=False)
-    #     last_checkpoint = train(args, train_dataloader, val_dataloader, model, tokenizer)
-    #
-    #     # test the last checkpoint after training
-    #     if args.do_test:
-    #         logger.info("Evaluate on dataset: " + args.test_yaml)
-    #         test_dataloader = make_data_loader(args, args.test_yaml,
-    #             tokenizer, args.distributed, is_train=False)
-    #         evaluate(args, test_dataloader, model, tokenizer, last_checkpoint)
-    #
-    # # inference and evaluation
-    # elif args.do_test or args.do_eval:
-    #     logger.info("Evaluate on dataset: " + args.test_yaml)
-    #     test_dataloader = make_data_loader(args, args.test_yaml,
-    #         tokenizer, args.distributed, is_train=False)
-    #
-    #     if not args.do_eval:
-    #         predict_file = get_predict_file(checkpoint, test_dataloader.dataset.yaml_file, args)
-    #         test(args, test_dataloader, model, tokenizer, predict_file)
-    #         logger.info("Prediction results saved to: {}".format(predict_file))
-    #     else:
-    #         evaluate_file = evaluate(args, test_dataloader, model, tokenizer,
-    #                 checkpoint)
-    #         logger.info("Evaluation results saved to: {}".format(evaluate_file))
+    model.to(args.device)
+    logger.info("Training/evaluation parameters %s", args)
+    if args.do_train:
+        train_dataloader = make_data_loader(args, args.train_yaml, tokenizer,
+            args.distributed, is_train=True)
+        val_dataloader = None
+        if args.evaluate_during_training:
+            val_dataloader = make_data_loader(args, args.val_yaml, tokenizer,
+                args.distributed, is_train=False)
+        last_checkpoint = train(args, train_dataloader, val_dataloader, model, tokenizer)
+
+        # test the last checkpoint after training
+        if args.do_test:
+            logger.info("Evaluate on dataset: " + args.test_yaml)
+            test_dataloader = make_data_loader(args, args.test_yaml,
+                tokenizer, args.distributed, is_train=False)
+            evaluate(args, test_dataloader, model, tokenizer, last_checkpoint)
+
+    # inference and evaluation
+    elif args.do_test or args.do_eval:
+        logger.info("Evaluate on dataset: " + args.test_yaml)
+        test_dataloader = make_data_loader(args, args.test_yaml,
+            tokenizer, args.distributed, is_train=False)
+
+        if not args.do_eval:
+            predict_file = get_predict_file(checkpoint, test_dataloader.dataset.yaml_file, args)
+            test(args, test_dataloader, model, tokenizer, predict_file)
+            logger.info("Prediction results saved to: {}".format(predict_file))
+        else:
+            evaluate_file = evaluate(args, test_dataloader, model, tokenizer,
+                    checkpoint)
+            logger.info("Evaluation results saved to: {}".format(evaluate_file))
 
 if __name__ == "__main__":
     main()
