@@ -56,6 +56,7 @@ class CaptionTSVDataset(Dataset):
         if is_train: assert op.isfile(self.caption_file) and tokenizer is not None
 
         self.label_tsv = None if not self.label_file else TSVFile(self.label_file)
+        import ipdb; ipdb.set_trace()
         self.feat_tsv = TSVFile(self.feat_file)
         self.captions = []
         if self.caption_file and op.isfile(self.caption_file):
@@ -929,6 +930,18 @@ def main():
     args = parser.parse_args()
 
     global logger
+
+    # args.device = torch.device("cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu")
+    # args.n_gpu = torch.cuda.device_count()
+    #
+    # output_dir = args.output_dir
+    # mkdir(output_dir)
+    #
+    # logger = setup_logger("vlpretrain", output_dir, 0)
+    # logger.warning("Device: %s, n_gpu: %s", args.device, args.n_gpu)
+    # set_seed(args.seed, args.n_gpu)
+
+
 
     # Setup CUDA, GPU & distributed training
     local_rank = ensure_init_process_group(local_rank=args.local_rank)

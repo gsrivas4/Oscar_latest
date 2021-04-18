@@ -625,7 +625,6 @@ class BertForImageCaptioning(CaptionPreTrainedModel):
             input_ids = None
 
         if input_ids is None:
-            import ipdb; ipdb.set_trace()
             input_ids = torch.full(
                 (batch_size, 1), bos_token_id, dtype=torch.long, device=next(self.parameters()).device
             )
